@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   ArrowUpRight,
+  Bird,
   Check,
+  Code,
   Leaf,
   Menu,
   ScanFace,
@@ -13,8 +15,13 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import consultationPhoto from "@/assets/clinic-consultation.jpg";
 import practitionerPhoto from "@/assets/clinic-practitioner.jpg";
+
+const heroImages = [
+  "/images/hero/hero-1.png",
+  "/images/hero/hero-2.png",
+  "/images/hero/hero-3.png",
+];
 
 const navigation = [
   { label: "Our approach", href: "#about" },
@@ -78,8 +85,17 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
 
   const closeMobileNav = () => setMobileNavOpen(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <main id="top" className="overflow-hidden bg-background text-foreground">
@@ -90,40 +106,72 @@ function HomePage() {
         Skip to content
       </a>
 
-      <section className="clinic-hero relative isolate flex flex-col justify-end" aria-label="Welcome">
-        <img
-          src={consultationPhoto}
-          alt="A practitioner speaking with a patient in a calm, light-filled clinic"
-          className="absolute inset-0 z-0 size-full object-cover object-[58%_center]"
-          fetchPriority="high"
-        />
-        <div className="clinic-hero-wash absolute inset-0 z-[1]" aria-hidden="true" />
+      {/* ==================== HERO ==================== */}
+      <section
+        className="relative isolate flex min-h-screen flex-col justify-end overflow-hidden bg-primary"
+        aria-label="Welcome"
+      >
+        {/* Background slideshow */}
+        <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          {heroImages.map((image, index) => (
+            <img
+              key={image}
+              src={image}
+              alt=""
+              fetchPriority={index === 0 ? "high" : "auto"}
+              className={`absolute inset-0 h-full w-full object-cover transition-all duration-[2000ms] ease-in-out ${
+                index === activeImage ? "scale-105 opacity-100" : "scale-100 opacity-0"
+              }`}
+            />
+          ))}
 
-        <header className="absolute inset-x-0 top-0 z-20 border-b border-primary-foreground/20 bg-foreground/25 backdrop-blur-sm">
+          {/* Light overall tint in brand green */}
+          <div className="absolute inset-0 bg-primary/10" />
+
+          {/* Left-side brand-green gradient for text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/45 to-transparent" />
+
+          {/* Bottom fade */}
+          <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-primary/40 to-transparent" />
+        </div>
+
+        {/* Header */}
+        <header className="absolute inset-x-0 top-0 z-30 border-b border-white/20 bg-primary/40 backdrop-blur-sm">
           <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:h-24 lg:px-12">
-            <a href="#top" aria-label="Auré Aesthetics home" className="flex items-center gap-3 text-primary-foreground">
+            {/* Logo */}
+            <a
+              href="#top"
+              aria-label="Auré Aesthetics home"
+              className="flex items-center gap-3 text-white"
+            >
               <span className="font-display text-4xl leading-none">Auré</span>
-              <span className="h-9 w-px bg-primary-foreground/55" aria-hidden="true" />
-              <span className="max-w-16 text-xs leading-4">AESTHETIC<br />CARE</span>
+              <span className="h-9 w-px bg-white/50" aria-hidden="true" />
+              <span className="max-w-16 text-xs leading-4 text-white/90">
+                AESTHETIC
+                <br />
+                CARE
+              </span>
             </a>
 
+            {/* Desktop navigation */}
             <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
               {navigation.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="text-sm font-medium text-primary-foreground/90 transition-colors hover:text-primary-foreground"
+                  className="text-sm font-medium text-white/90 transition-colors hover:text-white"
                 >
                   {item.label}
                 </a>
               ))}
             </nav>
 
+            {/* Desktop CTA */}
             <div className="hidden md:block">
               <Button
                 asChild
                 variant="outline"
-                className="h-12 rounded-none border-primary-foreground/60 bg-transparent px-5 text-primary-foreground shadow-none hover:bg-primary-foreground hover:text-foreground"
+                className="h-12 rounded-none border-white/70 bg-white/5 px-5 text-white shadow-none backdrop-blur-sm hover:bg-white hover:text-primary"
               >
                 <a href="#contact">
                   Book a consultation <ArrowUpRight aria-hidden="true" />
@@ -131,6 +179,7 @@ function HomePage() {
               </Button>
             </div>
 
+            {/* Mobile menu button */}
             <Button
               type="button"
               variant="ghost"
@@ -139,12 +188,13 @@ function HomePage() {
               aria-expanded={mobileNavOpen}
               aria-controls="mobile-navigation"
               onClick={() => setMobileNavOpen((open) => !open)}
-              className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground md:hidden"
+              className="text-white hover:bg-white/10 hover:text-white md:hidden"
             >
               {mobileNavOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
             </Button>
           </div>
 
+          {/* Mobile navigation */}
           {mobileNavOpen && (
             <nav
               id="mobile-navigation"
@@ -172,40 +222,58 @@ function HomePage() {
           )}
         </header>
 
-        <div id="main-content" className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 pt-36 sm:px-8 sm:pb-24 lg:px-12 lg:pb-28">
-          <div className="max-w-3xl">
-            <p className="mb-5 flex items-center gap-3 text-sm font-semibold text-primary-foreground">
-              <span className="h-px w-9 bg-accent" aria-hidden="true" />
+        {/* Hero content */}
+        <div
+          id="main-content"
+          className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl items-end px-5 pb-16 pt-36 sm:px-8 sm:pb-20 lg:px-12 lg:pb-24"
+        >
+          <div className="w-full max-w-3xl">
+            <p className="mb-5 flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-white">
+              <span className="h-px w-10 bg-accent" aria-hidden="true" />
               A more personal kind of aesthetic care
             </p>
-            <h1 className="max-w-2xl font-display text-6xl leading-[0.98] text-primary-foreground sm:text-7xl">
-              A little more <span className="text-accent">you.</span>
+
+            <h1 className="max-w-3xl font-display text-6xl font-normal leading-[0.95] tracking-[-0.02em] text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.55)] sm:text-7xl lg:text-8xl">
+              A little more{" "}
+              <span className="text-accent drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]">you.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-primary-foreground/90 sm:text-lg sm:leading-8">
-              Modern aesthetic medicine, thoughtfully shaped around your features, your pace, and the way you want to feel.
+
+            <p className="mt-7 max-w-xl text-base font-medium leading-7 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-lg sm:leading-8">
+              Modern aesthetic medicine, thoughtfully shaped around your features, your pace, and
+              the way you want to feel.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
-              <Button asChild className="h-12 rounded-none px-6 shadow-none">
+
+            <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <Button
+                asChild
+                className="h-12 rounded-none border-0 bg-white px-7 text-primary shadow-lg shadow-black/20 hover:bg-white/90"
+              >
                 <a href="#contact">
                   Book a consultation <ArrowUpRight aria-hidden="true" />
                 </a>
               </Button>
+
               <a
                 href="#treatments"
-                className="group inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-primary-foreground transition-colors hover:text-accent"
+                className="group inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] transition-colors hover:text-accent"
               >
                 Explore treatments
-                <ArrowRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform group-hover:translate-x-1"
+                />
               </a>
             </div>
-          </div>
-          <div className="mt-16 flex items-center gap-3 text-xs text-primary-foreground/80 sm:absolute sm:bottom-9 sm:right-12 sm:mt-0">
-            <span className="h-px w-8 bg-primary-foreground/60" aria-hidden="true" />
-            Thoughtful by design. Always about you.
+
+            <div className="mt-14 flex items-center gap-3 text-xs font-medium text-white/90 sm:mt-16">
+              <span className="h-px w-8 bg-white/70" aria-hidden="true" />
+              Thoughtful by design. Always about you.
+            </div>
           </div>
         </div>
       </section>
 
+      {/* ==================== VALUES ==================== */}
       <section aria-label="Our values" className="border-b border-border bg-background">
         <div className="mx-auto grid max-w-7xl divide-y divide-border px-5 sm:px-8 md:grid-cols-3 md:divide-x md:divide-y-0 lg:px-12">
           {[
@@ -221,10 +289,14 @@ function HomePage() {
         </div>
       </section>
 
+      {/* ==================== ABOUT ==================== */}
       <section id="about" className="scroll-mt-20 bg-background py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 md:grid-cols-[1fr_0.9fr] lg:gap-20 lg:px-12">
           <div className="relative mx-auto w-full max-w-lg md:mx-0">
-            <div className="absolute -bottom-4 -left-4 h-2/3 w-2/3 bg-secondary" aria-hidden="true" />
+            <div
+              className="absolute -bottom-4 -left-4 h-2/3 w-2/3 bg-secondary"
+              aria-hidden="true"
+            />
             <img
               src={practitionerPhoto}
               alt="A practitioner in a bright, contemporary clinic"
@@ -233,7 +305,9 @@ function HomePage() {
             />
             <div className="absolute bottom-5 left-5 max-w-[13rem] bg-background px-4 py-3 sm:bottom-7 sm:left-7">
               <p className="font-display text-xl">Care, with intention.</p>
-              <p className="mt-1 text-xs text-muted-foreground">A considered approach to every visit</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                A considered approach to every visit
+              </p>
             </div>
           </div>
 
@@ -243,7 +317,8 @@ function HomePage() {
               Your skin, <span className="text-moss">your story.</span>
             </h2>
             <p className="mt-6 text-base leading-7 text-muted-foreground">
-              Great aesthetic care starts with listening. We take time to understand what matters to you, then build a clear, considered plan together.
+              Great aesthetic care starts with listening. We take time to understand what matters
+              to you, then build a clear, considered plan together.
             </p>
             <ul className="mt-7 space-y-4">
               {[
@@ -252,7 +327,11 @@ function HomePage() {
                 "A pace that feels right for you",
               ].map((point) => (
                 <li key={point} className="flex items-start gap-3 text-sm leading-6">
-                  <Check aria-hidden="true" className="mt-1 size-4 shrink-0 text-moss" strokeWidth={2} />
+                  <Check
+                    aria-hidden="true"
+                    className="mt-1 size-4 shrink-0 text-moss"
+                    strokeWidth={2}
+                  />
                   <span>{point}</span>
                 </li>
               ))}
@@ -267,15 +346,19 @@ function HomePage() {
         </div>
       </section>
 
+      {/* ==================== TREATMENTS ==================== */}
       <section id="treatments" className="scroll-mt-20 bg-secondary/50 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
           <div className="mb-12 flex flex-col justify-between gap-5 sm:mb-16 md:flex-row md:items-end">
             <div className="max-w-2xl">
               <p className="mb-4 text-sm font-semibold text-moss">Explore our treatments</p>
-              <h2 className="font-display text-5xl leading-[1.04] sm:text-6xl">A thoughtful way forward.</h2>
+              <h2 className="font-display text-5xl leading-[1.04] sm:text-6xl">
+                A thoughtful way forward.
+              </h2>
             </div>
             <p className="max-w-md text-base leading-7 text-muted-foreground">
-              Every treatment begins with a conversation. Together, we’ll find the right place to start.
+              Every treatment begins with a conversation. Together, we’ll find the right place to
+              start.
             </p>
           </div>
 
@@ -292,13 +375,18 @@ function HomePage() {
                   </span>
                 </div>
                 <h3 className="mt-9 font-display text-3xl">{treatment.title}</h3>
-                <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">{treatment.description}</p>
+                <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
+                  {treatment.description}
+                </p>
                 <a
                   href="#contact"
                   className="mt-auto inline-flex items-center gap-2 pt-7 text-sm font-semibold text-moss"
                 >
                   Ask us about it
-                  <ArrowUpRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  />
                 </a>
               </article>
             ))}
@@ -306,27 +394,52 @@ function HomePage() {
         </div>
       </section>
 
-      <section id="experience" className="scroll-mt-20 bg-primary py-20 text-primary-foreground sm:py-28">
+      {/* ==================== EXPERIENCE ==================== */}
+      <section
+        id="experience"
+        className="scroll-mt-20 bg-primary py-20 text-primary-foreground sm:py-28"
+      >
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
           <div className="grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:gap-20">
             <div>
               <p className="mb-4 text-sm font-semibold text-accent">A visit that feels different</p>
-              <h2 className="font-display text-5xl leading-[1.04] sm:text-6xl">Calm, considered, and completely yours.</h2>
+              <h2 className="font-display text-5xl leading-[1.04] sm:text-6xl">
+                Calm, considered, and completely yours.
+              </h2>
               <p className="mt-6 max-w-lg text-base leading-7 text-primary-foreground/80">
-                We believe confidence grows when you feel heard. From your first conversation to your personalized plan, your experience is designed around what feels right for you.
+                We believe confidence grows when you feel heard. From your first conversation to
+                your personalized plan, your experience is designed around what feels right for
+                you.
               </p>
             </div>
             <div className="divide-y divide-primary-foreground/20 border-y border-primary-foreground/20">
               {[
-                { number: "01", title: "We listen", text: "Tell us what you hope to change, keep, or simply understand better." },
-                { number: "02", title: "We make a plan", text: "Explore options together, with clear guidance and room for questions." },
-                { number: "03", title: "We move at your pace", text: "Your care is personal. You decide what feels like the right next step." },
+                {
+                  number: "01",
+                  title: "We listen",
+                  text: "Tell us what you hope to change, keep, or simply understand better.",
+                },
+                {
+                  number: "02",
+                  title: "We make a plan",
+                  text: "Explore options together, with clear guidance and room for questions.",
+                },
+                {
+                  number: "03",
+                  title: "We move at your pace",
+                  text: "Your care is personal. You decide what feels like the right next step.",
+                },
               ].map((step) => (
-                <div key={step.number} className="grid gap-3 py-6 sm:grid-cols-[4rem_1fr] sm:gap-5 sm:py-7">
+                <div
+                  key={step.number}
+                  className="grid gap-3 py-6 sm:grid-cols-[4rem_1fr] sm:gap-5 sm:py-7"
+                >
                   <span className="font-display text-2xl text-accent">{step.number}</span>
                   <div>
                     <h3 className="font-display text-2xl">{step.title}</h3>
-                    <p className="mt-2 max-w-lg text-sm leading-6 text-primary-foreground/75">{step.text}</p>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-primary-foreground/75">
+                      {step.text}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -335,13 +448,17 @@ function HomePage() {
         </div>
       </section>
 
+      {/* ==================== CONTACT ==================== */}
       <section id="contact" className="scroll-mt-20 bg-background py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 md:grid-cols-[1fr_auto] md:items-end lg:px-12">
           <div className="max-w-3xl">
             <p className="mb-4 text-sm font-semibold text-moss">Your next step</p>
-            <h2 className="font-display text-5xl leading-[1.04] sm:text-6xl">Let’s begin with a conversation.</h2>
+            <h2 className="font-display text-5xl leading-[1.04] sm:text-6xl">
+              Let’s begin with a conversation.
+            </h2>
             <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground">
-              A personal consultation is a chance to share what you’re looking for, ask questions, and explore a plan that feels right for you.
+              A personal consultation is a chance to share what you’re looking for, ask questions,
+              and explore a plan that feels right for you.
             </p>
           </div>
           <Button asChild className="h-12 w-fit rounded-none px-6 shadow-none">
@@ -352,7 +469,10 @@ function HomePage() {
         </div>
         <div className="mx-auto mt-16 flex max-w-7xl flex-col gap-4 border-t border-border px-5 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <span>© {new Date().getFullYear()} Auré Aesthetics</span>
-          <span className="inline-flex items-center gap-2"><Leaf aria-hidden="true" className="size-4 text-moss" /> Thoughtful care, centered on you.</span>
+          <span className="inline-flex items-center gap-2">
+            <Code aria-hidden="true" className="size-4 text-moss" /> Designed by <a href="https://www.webmagpie.com"><Bird></Bird></a>
+          
+          </span>
         </div>
       </section>
     </main>
